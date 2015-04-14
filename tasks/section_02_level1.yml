@@ -15,226 +15,239 @@
 #   limitations under the License.
 #
 
-  - name: 2.1.1 Remove telnet-server (Scored)
-    yum: >
-      name=telnet-server
-      state=absent
+  - name: 2.1 Establish a Secure Baseline (Scored)
+    debug: netservices limited
     tags:
       - scored
       - section2.1
-      - section2.1.1
 
-  - name: 2.1.2 Remove telnet Clients (Scored)
-    yum: >
-      name=telnet
-      state=absent
+  - name: 2.2 Disable Unnecessary Local Services
     tags:
-      - scored
-      - section2.1
-      - section2.1.2
+      - section2.2
 
-  - name: 2.1.3 Remove rsh-server (Scored)
-    yum: >
-      name=rsh-server
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.3
-
-  - name: 2.1.4 Remove rsh (Scored)
-    yum: >
-      name=rsh
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.4
-
-  - name: 2.1.5 Remove NIS Client (Scored)
-    yum: > 
-      name=ypbind
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.5
-
-  - name: 2.1.6 Remove NIS Server (Scored)
-    yum: >
-      name=ypserv
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.6
-
-  - name: 2.1.7 Remove tftp (Scored)
-    yum: >
-      name=tftp
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.7
-
-  - name: 2.1.8 Remove tftp-server (Scored)
-    yum: >
-      name=tftp-server
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.8
-
-  - name: 2.1.9 Remove talk (Scored)
-    yum: >
-      name=talk
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.9
-
-  - name: 2.1.10 Remove talk-server (Scored)
-    yum: >
-      name=talk-server
-      state=absent
-    tags:
-      - scored
-      - section2.1
-      - section2.1.10
-
-  - name: 2.1.12 Disable chargen-dgram (check if exists)
-    stat: path=/etc/xinetd.d/chargen-dgram
-    register: chargen_dgram
-    tags:
-      - scored
-      - section2.1
-      - section2.1.12
-
-  - name: 2.1.12 Disable chargen-dgram (disable xinetd service)
+  - name: 2.2.1 Disable Local CDE ToolTalk Database Server (Scored)
     service: >
-        name=chargen-dgram
-        state=stopped
-        enabled=no
-    when: chargen_dgram.stat.exists
+      name=svc:/network/rpc/cde-ttdbserver:tcp
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.12
+      - section2.2
+      - section2.2.1
 
-  - name: 2.1.13 Disable chargen-stream (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/chargen-stream
-    register: chargen_stream
-    tags:
-      - scored
-      - section2.1
-      - section2.1.13
-
-  - name: 2.1.13 Disable chargen-stream (disable xinetd service) (Scored)
+  - name: 2.2.2 Disable Local CDE Calendar Manager (Scored)
     service: >
-        name=chargen-stream
-        state=stopped
-        enabled=no
-    when: chargen_stream.stat.exists
+      name=svc:/network/rpc/cde-calendar-manager:default
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.13
+      - section2.2
+      - section2.2.2
 
-  - name: 2.1.14 Disable daytime-dgram (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/daytime-dgram
-    register: daytime_dgram
-    tags:
-      - scored
-      - section2.1
-      - section2.1.14
-
-  - name: 2.1.14 Disable daytime-dgram (disable xinetd service) (Scored)
+  - name: 2.2.3 Disable Local Graphical Login Environment (Scored)
     service: >
-        name=daytime-dgram
-        state=stopped
-        enabled=no
-    when: daytime_dgram.stat.exists
-    tags:
-      - scored
-      - section2.1
-      - section2.1.14
-
-  - name: 2.1.15 Disable daytime-stream (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/daytime-stream
-    register: daytime_stream
-    tags:
-      - scored
-      - section2.1
-      - section2.1.15
-
-  - name: 2.1.15 Disable daytime-stream (disable xinetd service) (Scored)
+      name=svc:/application/graphical-login/cde-login
+      state=stopped
     service: >
-        name=daytime-stream
-        state=stopped
-        enabled=no
-    when: daytime_stream.stat.exists
+      name=svc:/application/gdm2-login
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.15
+      - section2.2
+      - section2.2.3
 
-  - name: 2.1.16 Disable echo-dgram (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/echo-dgram
-    register: echo_dgram
-    tags:
-      - scored
-      - section2.1
-      - section2.1.16
-
-  - name: 2.1.16 Disable echo-dgram (disable xinetd service) (Scored)
+  - name: 2.2.4 Disable Local sendmail Service (Scored)
     service: >
-        name=echo-dgram
-        state=stopped
-        enabled=no
-    when: echo_dgram.stat.exists
+      name=svc:/network/smtp:sendmail
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.16
+      - section2.2
+      - section2.2.4
 
-  - name: 2.1.17 Disable echo-stream (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/echo-stream
-    register: echo_stream
-    tags:
-      - scored
-      - section2.1
-      - section2.1.17
-
-  - name: 2.1.17 Disable echo-stream (disable xinetd service) (Scored)
+  - name: 2.2.5 Disable Local Web Console (Scored)
     service: >
-        name=echo-stream
-        state=stopped
-        enabled=no
-    when: echo_stream.stat.exists
+      name=svc:/system/webconsole:console
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.17
+      - section2.2
+      - section2.2.5
 
-  - name: 2.1.18 Disable tcpmux-server (check if exists) (Scored)
-    stat: path=/etc/xinetd.d/tcpmux-server
-    register: tcpmux_server
-    tags:
-      - scored
-      - section2.1
-      - section2.1.18
-
-  - name: 2.1.18 Disable tcpmux-server (disable xinetd service) (Scored)
+  - name: 2.2.6 Disable Local WBEM (Scored)
     service: >
-        name=tcpmux-server
-        state=stopped
-        enabled=no
-    when: tcpmux_server.stat.exists
+      name=svc:/application/management/wbem
+      state=stopped
     tags:
       - scored
-      - section2.1
-      - section2.1.18
+      - section2.2
+      - section2.2.6
+
+  - name: 2.2.7 Disable Local BSD Print Protocol Adapter (Scored)
+    service: >
+      name=svc:/application/print/rfc1179
+      state=stopped
+    tags:
+      - scored
+      - section2.2
+      - section2.2.7
+
+  - name: 2.3 Disable Other Services
+    tags:
+      - section2.3
+
+  - name: 2.3.1 Disable RPC Encryption Key (Scored)
+    service: >
+      name=svc:/network/rpc/keyserv
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.1
+
+  - name: 2.3.2 Disable NIS Server Daemons (Scored)
+    service: name=svc:/network/nis/server state=stopped
+    service: name=svc:/network/nis/passwd state=stopped
+    service: name=svc:/network/nis/update state=stopped
+    service: name=svc:/network/nis/xfr state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.2
+
+  - name: 2.3.3 Disable NIS Client Daemons (Scored)
+    service: >
+      name=svc:/network/nis/client
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.3
+
+  - name: 2.3.4 Disable NIS+ Daemons (Scored)
+    service: >
+      name=svc:/network/rpc/nisplus
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.4
+
+  - name: 2.3.5 Disable LDAP Cache Manager (check if LDAP is configured) (Scored)
+    shell: /usr/sbin/ldapclient list
+    register: ldap_configured
+    tags:
+      - scored
+      - section2.3
+      - section2.3.5
+
+  - name: 2.3.5 Disable LDAP Cache Manager (Scored)
+    service: >
+      name=svc:/network/ldap/client
+      state=stopped
+    when: ldap_configured|failed
+    tags:
+      - scored
+      - section2.3
+      - section2.3.5
+
+  - name: 2.3.6 Disable Kerberos TGT Expiration Warning (Scored)
+    service: >
+      name=svc:/network/security/ktkt_warn
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.6
+
+  - name: 2.3.7 Disable Generic Security Services (GSS) Daemons (Scored)
+    service: >
+      name=svc:/network/rpc/gss
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.7
+
+  - name: 2.3.8 Disable Volume Manager (Scored)
+    service: >
+      name=svc:/system/filesystem/volfs
+      state=stopped
+    service: >
+      name=svc:/network/rpc/smserver
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.8
+
+  - name: 2.3.9 Disable Samba Support (Scored)
+    service: >
+      name=svc:/network/samba
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.9
+
+  - name: 2.3.10 Disable automount Daemon (Scored)
+    service: >
+      name=svc:/system/filesystem/autofs
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.10
+
+  - name: 2.3.11 Disable Apache Services (Scored)
+    service: >
+      name=svc:/network/http:apache2
+      state=stopped
+    tags:
+      - scored
+      - section2.3
+      - section2.3.11
+
+  - name: 2.3.12 Disable Solaris Volume Manager Services (Scored)
+    service: >
+      name=svc:/system/metainit
+      state=stopped
+    when: globalzone
+    service: >
+      name=svc:/system/mdmonitor
+      state=stopped
+    when: globalzone
+    tags:
+      - scored
+      - section2.3
+      - section2.3.12
+
+  - name: 2.3.13 Disable Solaris Volume Manager GUI (Scored)
+    service: name=svc:/network/rpc/mdcomm state=stopped
+    when: globalzone
+    service: name=svc:/network/rpc/meta state=stopped
+    when: globalzone
+    service: name=svc:/network/rpc/metamed state=stopped
+    when: globalzone
+    service: name=svc:/network/rpc/metamh state=stopped
+    when: globalzone
+    tags:
+      - scored
+      - section2.3
+      - section2.3.13
+
+  - name: 2.3.14 Disable Local RPC Port Mapping Service (Scored)
+    service: >
+      name=svc:/network/rpc/bind
+      state=stopped
+    debug: May use tcpwrapper
+    debug: disable only when not needed
+    tags:
+      - scored
+      - section2.3
+      - section2.3.14
+
+  - name: 2.4 Configure TCP Wrappers
+    tags:
+      - scored
+      - section2.4
       

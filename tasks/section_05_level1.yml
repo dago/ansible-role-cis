@@ -15,91 +15,28 @@
 #   limitations under the License.
 #
 
-  - name: 5.1.1 Install the rsyslog package (Scored)
-    yum: >
-      name=rsyslog
-      state=present
+  - name: 5.1 Set daemon umask (Scorable)
+    - lineinfile: dest=/etc/default/init regex="^CMASK=" line="CMASK=022"
+      register: init
+    - shell: pkgchk -f -n -p /etc/default/init
+      when: init.changed
+    - set_fact: requires_reboot=1
+      when: init.changed
     tags:
       - scored
       - section5.1
-      - section5.1.1
 
-  - name: 5.1.2 Activate the rsyslog Service (Scored)
-    service: >
-      name=rsyslog
-      enabled=yes
-      state=started
+  - name: 5.2 Restrict Set-UID on User Mounted Devices (Scored)
+    XXX: TBD and already default since Solaris 8
     tags:
       - scored
-      - section5.1
-      - section5.1.2
+      - section5.2
 
-  - name: 5.1.3 Configure /etc/rsyslog.conf (Not Scored)
-    copy: >
-      src=etc/rsyslog.conf
-      dest=/etc/rsyslog.conf
-      owner=root
-      group=root
-      mode=0644
-    tags:
-      - notscored
-      - section5.1
-      - section5.1.3
-
-  - name: 5.1.4 Create and Set Permissions on rsyslog Log Files (Scored)
-    file: >
-      path=/var/log/{{ item }}
-      state=touch
-      owner=root
-      group=wheel
-      mode=0640
-    with_items:
-        - messages
-        - kern.log
-        - daemon.log
-        - syslog
-        - unused.log
-    tags:
-      - scored
-      - section5.1
-      - section5.1.4
-
-  - name: 5.1.5 Configure rsyslog to Send Logs to a Remote Log Host (Scored)
-    lineinfile: >
-      state=present
-      dest=/etc/rsyslog.conf
-      regexp="^\*\.\*"
-      line="*.* @@{{ rsyslog_dest }}"
-    when: rsyslog_dest is defined
-    tags:
-      - scored
-      - section5.1
-      - section5.1.5
-
-  - name: 5.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts (Not Scored)
-    lineinfile: >
-      state=present
-      line="$ModLoad imtcp.so"
-    when: rsyslog_host
-    tags:
-      - notscored
-      - section5.1
-      - section5.1.6
-
-  - name: 5.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts (Not Scored)
-    lineinfile: >
-      state=present
-      line="$InputTCPServerRun 514"
-    when: rsyslog_host
-    tags:
-      - notscored
-      - section5.1
-      - section5.1.6
-
-  - name: 5.3 Configure logrotate (Not Scored)
-    copy: >
-      src=etc/logrotate.d/syslog
-      dest=/etc/logrotate.d/syslog
+  - name: 5.3 Set Sticky Bit on World Writable Directories
+    - shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs –o -fstype ctfs -o –fstype mntfs –o –fstype objfs –o –fstype proc \) -prune -o -type d \( -perm -0002 -a ! -perm -1000 \) -print
+      register: world_writable
+    - file: dest={{ item }} mode=+t
+      with_items: world_writable.stdout_lines
     tags:
       - notscored
       - section5.3
