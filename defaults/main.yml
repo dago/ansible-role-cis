@@ -1,3 +1,6 @@
+exclusive_ip_stack: no
+
+
 # Should we configure AIDE on the system? (CIS 1.3)
 # Options:
 #   yes: install and configure AIDE

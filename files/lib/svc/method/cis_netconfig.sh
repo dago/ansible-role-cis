@@ -1,6 +1,6 @@
 #!/sbin/sh
 
-ndd -set /dev/ip ip_forward_src_routed 0
+{% if ip_forward_src_routed is not defined %}# {% endif %}ndd -set /dev/ip ip_forward_src_routed 0
 ndd -set /dev/ip ip6_forward_src_routed 0
 ndd -set /dev/tcp tcp_rev_src_routes 0
 ndd -set /dev/ip ip_forward_directed_broadcasts 0
@@ -9,7 +9,7 @@ ndd -set /dev/tcp tcp_conn_req_max_q 1024
 ndd -set /dev/ip ip_respond_to_timestamp 0
 ndd -set /dev/ip ip_respond_to_timestamp_broadcast 0
 ndd -set /dev/ip ip_respond_to_address_mask_broadcast 0
-ndd –set /dev/ip ip6_respond_to_echo_multicast 0 
+ndd -set /dev/ip ip6_respond_to_echo_multicast 0 
 ndd -set /dev/ip ip_respond_to_echo_broadcast 0
 ndd -set /dev/arp arp_cleanup_interval 60000
 ndd -set /dev/ip ip_ire_arp_interval 60000

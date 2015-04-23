@@ -15,12 +15,139 @@
 #   limitations under the License.
 #
 
-  - include: section_04_level1.yml
+  - name: 4.1 Enable inetd Connection Logging (Scored)
+    shell: inetadm -M tcp_trace=true
+    notify: Refresh inetd
+    # XXX: audit svcprop -p defaults/tcp_trace svc:/network/inetd
     tags:
-      - section4
-      - level1
+      - scored
+      - section4.1
 
-  - include: section_04_level2.yml
+  - name: 4.2 Enable FTP daemon Logging (Scored)
+    shell: inetadm -m svc:/network/ftp exec="/usr/sbin/in.ftpd -a -l -d"
+    # XXX: audit svcprop -p inetd_start/exec svc:/network/ftp "/usr/sbin/in.ftpd -a -l -d"
     tags:
-      - section4
-      - level2
+      - scored
+      - section4.2
+
+  - name: 4.3 Enable Debug Level Daemon Logging (Scored)
+    file: path=/var/log/connlog owner=root group=root mode=600 state=touch
+    tags:
+      - scored
+      - section4.3
+
+  - name: 4.3 Enable Debug Level Daemon Logging (Scored)
+    shell: logadm -w connlog -C 13 -a 'pkill -HUP syslogd' /var/log/connlog
+    tags:
+      - scored
+      - section4.3
+
+  - name: 4.3 Enable Debug Level Daemon Logging (Scored)
+    lineinfile: dest=/etc/syslog.conf line="daemon.debug\t\t\t/var/log/connlog" 
+    notify: Refresh syslogd
+    tags:
+      - scored
+      - section4.3
+
+  - name: 4.4 Capture syslog AUTH Messages (Scored)
+    file: path=/var/log/authlog owner=root group=sys mode=600 state=touch
+    tags:
+      - scored
+      - section4.4
+
+  - name: 4.4 Capture syslog AUTH Messages (Scored)
+    shell: logadm -w authlog -C 13 -a 'pkill -HUP syslogd' /var/log/authlog
+    tags:
+      - scored
+      - section4.4
+
+  - name: 4.4 Capture syslog AUTH Messages (Scored)
+    lineinfile: dest=/etc/syslog.conf line="auth.info\t\t\t/var/log/authlog" 
+    notify: Refresh syslogd
+    tags:
+      - scored
+      - section4.4
+
+  - name: 4.5 Enable Login Records (Scored)
+    file: path=/var/adm/loginlog owner=root group=sys mode=600 state=touch
+    tags:
+      - scored
+      - section4.5
+
+  - name: 4.5 Enable Login Records (Scored)
+    shell: logadm -w authlog -C 13 /var/adm/loginlog
+    tags:
+      - scored
+      - section4.5
+
+  - name: 4.6 Capture All Failed Login Attempts (Scored)
+    lineinfile: >
+      dest=/etc/default/login
+      regexp="^SYSLOG_FAILED_LOGINS="
+      insertafter="^#SYSLOG_FAILED_LOGINS="
+      line="SYSLOG_FAILED_LOGINS=0"
+    register: login
+    tags:
+      - scored
+      - section4.6
+
+  - name: 4.6 Capture All Failed Login Attempts (Scored)
+    shell: pkgchk -f -n -p /etc/default/login
+    when: login.changed
+    tags:
+      - scored
+      - section4.6
+
+  - name: 4.7 Enable cron Logging (Scored)
+    file: path=/var/cron/log owner=root group=root mode=go-rwx
+    tags:
+      - scored
+      - section4.7
+
+  - name: 4.7 Enable cron Logging (Scored)
+    lineinfile: >
+      dest=/etc/default/cron
+      regexp="^CRONLOG="
+      insertafter="^#CRONLOG="
+      line="CRONLOG=YES"
+    register: cron
+    tags:
+      - scored
+      - section4.7
+
+  - name: 4.7 Enable cron Logging (Scored)
+    shell: pkgchk -f -n -p /etc/default/cron
+    when: cron.changed
+    tags:
+      - scored
+      - section4.7
+
+  - name: 4.8 Enable System Accounting (Scored)
+    service: >
+      name=svc:/system/sar
+      state=started
+    tags:
+      - scored
+      - section4.8
+
+  - name: 4.8 Enable System Accounting (Scored)
+    cron: name="System Activity Reporter (Frequent)" user=sys minute="0,20,40" job="/usr/lib/sa/sa1" state=present
+    tags:
+      - scored
+      - section4.8
+
+  - name: 4.8 Enable System Accounting (Scored)
+    cron: name="System Activity Reporter (Daily)" user=sys minute="45" hour="23" job="/usr/lib/sa/sa2 -s 0:00 -e 23:59 -i 1200 -A" state=present
+    tags:
+      - scored
+      - section4.8
+
+  - name: 4.8 Enable System Accounting (Scored)
+    file: path={{ item }} owner=sys group=sys mode=go-wx
+    with_fileglob: /var/adm/sa/*
+    tags:
+      - scored
+      - section4.8
+
+  - name: 4.9 Kernel Level Auditing (Scored)
+    debug: "XXX: TBD"

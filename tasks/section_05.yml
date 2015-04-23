@@ -15,12 +15,46 @@
 #   limitations under the License.
 #
 
-  - include: section_05_level1.yml
+  - name: 5.1 Set daemon umask (Scorable)
+    lineinfile: >
+      dest=/etc/default/init
+      regexp="^CMASK="
+      line="CMASK=022"
+    register: init
     tags:
-      - section5
-      - level1
+      - scored
+      - section5.1
 
-  - include: section_05_level2.yml
+  - name: 5.1 Set daemon umask (Scorable)
+    shell: pkgchk -f -n -p /etc/default/init
+    when: init.changed
     tags:
-      - section5
-      - level2
+      - scored
+      - section5.1
+
+  - name: 5.1 Set daemon umask (Scorable)
+    set_fact: requires_reboot=yes
+    when: init.changed
+    tags:
+      - scored
+      - section5.1
+
+  - name: 5.2 Restrict Set-UID on User Mounted Devices (Scored)
+    debug: "XXX: TBD and already default since Solaris 8"
+    tags:
+      - scored
+      - section5.2
+
+  - name: 5.3 Set Sticky Bit on World Writable Directories
+    shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o -type d \( -perm -0002 -a ! -perm -1000 \) -print
+    register: world_writable
+    tags:
+      - notscored
+      - section5.3
+
+  - name: 5.3 Set Sticky Bit on World Writable Directories
+    file: dest={{ item }} mode=u+t
+    with_items: world_writable.stdout_lines
+    tags:
+      - notscored
+      - section5.3

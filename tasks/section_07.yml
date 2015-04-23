@@ -15,13 +15,66 @@
 #   limitations under the License.
 #
 
-  - include: section_07_level1.yml
+  - name: 7.1 Disable System Accounts (Scored)
+    debug: "TBD"
     tags:
-      - section7
-      - level1
+      - scored
+      - section7.1
 
-  - include: section_07_level2.yml
+  - name: 7.2 Set Password Expiration Parameters on Active Accounts (Scored)
+    debug: "TBD"
     tags:
-      - section7
-      - level2
+      - scored
+      - section7.2
+
+  - name: 7.3 Set Strong Password Creation Policies (Scored)
+    debug: "TBD"
+    tags:
+      - scored
+      - section7.3
+
+  - name: 7.4 Set Default Group for root Account (Scored)
+    user: >
+      name=root
+      group=root
+    tags:
+      - scored
+      - section7.4
+
+  - name: 7.5 Change Home Directory for root Account (Scored)
+    file: path=/root owner=root group=root mode=700
+    # XXX: move /.?* /root
+    tags:
+      - scored
+      - section7.5
+
+  - name: 7.5 Change Home Directory for root Account (Scored)
+    shell: passmgmt -m -h /root root
+    tags:
+      - scored
+      - section7.5
+
+  - name: 7.6 Set Default umask for Users (Scored)
+    debug: "TBD"
+    tags:
+      - scored
+      - section7.6
+
+  - name: 7.7 Set Default umask for FTP Users (Scored)
+    debug: "TBD"
+    tags:
+      - scored
+      - section7.7
+
+  - name: 7.8 Set "mesg n" as Default for All Users (Scored)
+    debug: "TBD"
+    tags:
+      - scored
+      - section7.8
+
+  - name: 7.9 Lock Inactive User Accounts (Scored)
+    debug: "TBD"
+    tags:
+      - scored
+      - section7.9
 

@@ -15,12 +15,260 @@
 #   limitations under the License.
 #
 
-  - include: section_03_level1.yml
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: /usr/bin/coreadm
+    register: coreadm
     tags:
-      - section3
-      - level1
+      - scored
+      - section3.1
 
-  - include: section_03_level2.yml
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    file: >
+      path=/var/cores
+      owner=root
+      group=root
+      mode=700
+      state=directory
     tags:
-      - section3
-      - level2
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -g /var/cores/core_%n_%f_%u_%g_%t_%p
+    when: "'global core file pattern: /var/cores/core_%n_%f_%u_%g_%t_%p' not in coreadm.stdout_lines"
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -e log
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -e global
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -e global-setid
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -d process
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
+    command: coreadm -d proc-setid
+    tags:
+      - scored
+      - section3.1
+
+  - name: 3.2 Enable Stack Protection (Scored)
+    lineinfile: >
+      dest=/etc/system
+      state=present
+      line="set noexec_user_stack=1"
+      backup=yes
+    when: ansible_container != "zone"
+    lineinfile: >
+      dest=/etc/system
+      state=present
+      line="set noexec_user_stack_log=1"
+      backup=yes
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section3.2
+
+  - name: 3.3 Enable Strong TCP Sequence Number Generation (Scored)
+    lineinfile: >
+      dest=/etc/default/inetinit
+      state=present
+      regexp="^TCP_STRONG_ISS="
+      line="TCP_STRONG_ISS=2"
+    tags:
+      - scored
+      - section3.3
+
+  - name: 3.4.1 Disable Source Packet Forwarding (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_forward_src_routed 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.1
+
+  - name: 3.4.2 Disable Broadcast Packet Forwarding (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_forward_directed_broadcasts 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.2
+
+  - name: 3.4.3 Disable Response to ICMP Timestamp Requests (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_respond_to_timestamp 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.3
+
+  - name: 3.4.4 Disable Response to ICMP Broadcast Timestamp Requests (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_respond_to_timestamp_broadcast 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.4
+
+  - name: 3.4.5 Disable Response to ICMP Netmask Requests (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_respond_to_address_mask_broadcast 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.5
+
+  - name: 3.4.6 Disable ICMPv6 Redirect Messages (Scored)
+    lineinfile: line="ndd -set /dev/ip ip6_send_redirects 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.6
+
+  - name: 3.4.7 Disable Response to Broadcast ICMPv4 Echo Request (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_respond_to_echo_broadcast 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.7
+
+  - name: 3.4.8 Disable Response to Multicast Echo Request (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_respond_to_echo_multicast 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.8
+
+  - name: 3.4.9 Set Interval for Scanning IRE_CACHE (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_ire_arp_interval 60000"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.9
+
+  - name: 3.4.10 Ignore ICMP Redirect Messages (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_ignore_redirect 1"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.10
+
+  - name: 3.4.10 Ignore ICMP Redirect Messages (Scored)
+    lineinfile: line="ndd -set /dev/ip ip6_ignore_redirect 1"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.10
+
+  - name: 3.4.11 Set Strict Multihoming (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_strict_dst_multihoming 1"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.11
+
+  - name: 3.4.11 Set Strict Multihoming (Scored)
+    lineinfile: line="ndd -set /dev/ip ip6_strict_dst_multihoming 1"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.11
+
+  - name: 3.4.12 Disable ICMPv4 Redirect Messages (Scored)
+    lineinfile: line="ndd -set /dev/ip ip_send_redirects 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.12
+
+  - name: 3.4.13 Set ARP Cleanup Interval (Scored)
+    lineinfile: line="ndd -set /dev/arp arp_cleanup_interval 60000"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.13
+
+  - name: 3.4.14 Disable TCP Reverse IP Routing (Scored)
+    lineinfile: line="ndd -set /dev/tcp tcp_rev_src_routes 0"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.14
+
+  - name: 3.4.15 Set Maximum Number of Half-open TCP Connections (Scored)
+    lineinfile: line="ndd -set /dev/tcp tcp_conn_req_max_q0 4096"
+    #debug: "XXX: only increase"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.15
+
+  - name: 3.4.16 Set Maximum Number of Incoming Connections (Scored)
+    lineinfile: line="ndd -set /dev/tcp tcp_conn_req_max_q 1024"
+    #debug: "XXX: only increase"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.16
+
+  - name: 3.4.17 Lock down dtspcd (Scored)
+    lineinfile: line="ndd -set /dev/tcp tcp_extra_priv_ports_add 6112"
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.4
+      - section3.4.17
+
+  - name: 3.5 Disable Network Routing [forwarding] (Scored)
+    command: routeadm -d ipv4-forwarding -d ipv6-forwarding
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.5
+
+  - name: 3.5 Disable Network Routing [routing] (Scored)
+    command: routeadm -d ipv4-routing -d ipv6-routing
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.5
+
+  - name: 3.5 Disable Network Routing [apply] (Scored)
+    command: routeadm -u
+    # XXX TBD: Only when forwarding or routing has changed
+    when: ansible_container != "zone" or exclusive_ip_stack
+    tags:
+      - scored
+      - section3.5

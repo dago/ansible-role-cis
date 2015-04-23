@@ -15,4 +15,8 @@
 #   limitations under the License.
 #
 
-# CIS Section 7 has no Level 2 checks
+  - name: Reboot
+    debug: msg="Please reboot the system for the changes to take effect"
+    when: requires_reboot
+    tags:
+      - always

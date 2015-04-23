@@ -15,13 +15,213 @@
 #   limitations under the License.
 #
 
-  - include: section_06_level1.yml
+  - name: 6.1 Disable 'login' Prompts on Serial Ports (Scored)
+    # pmadm -L: 
+    # zsmon:ttymon:ttya:ux:root:reserved:reserved:reserved:/dev/term/a:I::/usr/bin/login::9600:ldterm,ttcompat:ttya login\: ::tvi925:y:# 
+    # zsmon:ttymon:ttyb:u:root:reserved:reserved:reserved:/dev/term/b:I::/usr/bin/login::9600:ldterm,ttcompat:ttyb login\: ::tvi925:y:# 
+    shell: pmadm -d -p zsmon -s ttya
+    shell: pmadm -d -p zsmon -s ttyb
     tags:
-      - section6
-      - level1
+      - scored
+      - section6.1
 
-  - include: section_06_level2.yml
+  - name: 6.2 Disable "nobody" Access for RPC Encryption Key Storage Service (Scored)
+    lineinfile: >
+      dest=/etc/default/keyserv
+      regexp="^ENABLE_NOBODY_KEYS="
+      line="ENABLE_NOBODY_KEYS=NO"
+    register: keyserv
     tags:
-      - section6
-      - level2
+      - scored
+      - section6.2
 
+  - name: 6.2 Disable "nobody" Access for RPC Encryption Key Storage Service (Scored)
+    shell: pkgchk -f -n -p /etc/default/keyserv
+    when: keyserv.changed
+    tags:
+      - scored
+      - section6.2
+
+  - name: 6.3.1 Set SSH Protocol to 2 (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*Protocol\s" line="Protocol 2"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.1
+
+  - name: 6.3.2 Disable SSH X11Forwarding (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*X11Forwarding\s"
+      line="X11Forwarding no"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.2
+
+  - name: 6.3.3 Set SSH MaxAuthTries to 3 (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*MaxAuthTries\s"
+      line="MaxAuthTries 3"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.3
+
+  - name: 6.3.4 Set SSH MaxAuthTriesLog to 0 (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*MaxAuthTriesLog\s"
+      line="MaxAuthTriesLog 0"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.4
+
+  - name: 6.3.5 Set SSH IgnoreRhosts to yes (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*IgnoreRhosts\s"
+      line="IgnoreRhosts yes"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.5
+
+  - name: 6.3.6 Set SSH RhostsAuthentication to no (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*RhostsAuthentication\s"
+      line="RhostsAuthentication no"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.6
+
+  - name: 6.3.7 Set SSH RhostsRSAAuthentication to no (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*RhostsRSAAuthentication\s"
+      line="RhostsRSAAuthentication no"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.7
+
+  - name: 6.3.8 Disable SSH root login (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*PermitRootLogin\s"
+      line="PermitRootLogin no"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.8
+
+  - name: 6.3.9 Set SSH PermitEmptyPasswords to no (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*PermitEmptyPasswords\s"
+      line="PermitEmptyPasswords no"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.9
+
+  - name: 6.3.10 Set SSH Banner (Scored)
+    lineinfile: >
+      dest=/etc/ssh/sshd_config
+      regexp="^\s*Banner\s"
+      line="Banner /etc/issue"
+    notify: Refresh sshd_config
+    tags:
+      - scored
+      - section6.3
+      - section6.3.10
+
+  - name: 6.4 Disable .rhosts Support in /etc/pam.conf (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.4
+
+  - name: 6.5 Restrict FTP Use (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.5
+
+  - name: 6.6 Set Delay between Failed Login Attempts to 4 (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.6
+
+  - name: 6.7 Set Default Screen Lock for CDE Users (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.7
+
+  - name: 6.8 Set Default Screen Lock for GNOME Users (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.8
+
+  - name: 6.9 Restrict at/cron to Authorized Users (Scored)
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.9
+
+  - name: 6.10 Restrict root Login to System Console (Scored)
+    lineinfile: >
+      dest=/etc/default/login
+      regexp="^\s*CONSOLE\s*="
+      line="CONSOLE=/dev/console"
+    tags:
+      - scored
+      - section6.10
+
+  - name: 6.11 Set Retry Limit for Account Lockout (Scored)
+    lineinfile: >
+      dest=/etc/default/login
+      regexp="^\s*RETRIES\s*="
+      line="RETRIES=3"
+    tags:
+      - scored
+      - section6.11
+
+  - name: 6.11 Set Retry Limit for Account Lockout (Scored)
+    lineinfile: >
+      dest=/etc/security/policy.conf
+      regexp="^\s*LOCK_AFTER_RETRIES\s*="
+      line="LOCK_AFTER_RETRIES=YES"
+    tags:
+      - scored
+      - section6.11
+
+  - name: 6.12 Set EEPROM Security Mode and Log Failed Access
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.12
+
+  - name: 6.13 Secure the GRUB Menu
+    debug: msg="TBD"
+    tags:
+      - scored
+      - section6.13

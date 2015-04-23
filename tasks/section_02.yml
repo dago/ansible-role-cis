@@ -15,12 +15,334 @@
 #   limitations under the License.
 #
 
-  - include: section_02_level1.yml
+  - name: 2.1 Establish a Secure Baseline (Scored)
+    command: /usr/sbin/netservices limited
     tags:
-      - section2
-      - level1
+      - scored
+      - section2.1
 
-  - include: section_02_level2.yml
+  - name: 2.2.1 Disable Local CDE ToolTalk Database Server (Scored)
+    service: >
+      name=svc:/network/rpc/cde-ttdbserver:tcp
+      enabled=false
     tags:
-      - section2
-      - level2
+      - scored
+      - section2.2
+      - section2.2.1
+
+  - name: 2.2.2 Disable Local CDE Calendar Manager (Scored)
+    service: >
+      name=svc:/network/rpc/cde-calendar-manager:default
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.2
+
+  - name: 2.2.3 Disable Local Graphical Login [cde-login] (Scored)
+    service: >
+      name=svc:/application/graphical-login/cde-login
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.3
+
+  - name: 2.2.3 Disable Local Graphical Login [gdm2-login] (Scored)
+    service: >
+      name=svc:/application/gdm2-login
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.3
+
+  - name: 2.2.4 Disable Local sendmail Service (Scored)
+    service: >
+      name=svc:/network/smtp:sendmail
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.4
+
+  - name: 2.2.5 Disable Local Web Console (Scored)
+    service: >
+      name=svc:/system/webconsole:console
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.5
+
+  - name: 2.2.6 Disable Local WBEM (Scored)
+    service: >
+      name=svc:/application/management/wbem
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.6
+
+  - name: 2.2.7 Disable Local BSD Print Protocol Adapter (Scored)
+    service: >
+      name=svc:/application/print/rfc1179
+      enabled=false
+    tags:
+      - scored
+      - section2.2
+      - section2.2.7
+
+  - name: 2.3.1 Disable RPC Encryption Key (Scored)
+    service: >
+      name=svc:/network/rpc/keyserv
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.1
+
+  - name: 2.3.2 Disable NIS Server Daemons [server] (Scored)
+    service: >
+      name=svc:/network/nis/server
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.2
+
+  - name: 2.3.2 Disable NIS Server Daemons [passwd] (Scored)
+    service: >
+      name=svc:/network/nis/passwd
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.2
+
+  - name: 2.3.2 Disable NIS Server Daemons [update] (Scored)
+    service: >
+      name=svc:/network/nis/update
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.2
+
+  - name: 2.3.2 Disable NIS Server Daemons [xfr] (Scored)
+    service: >
+      name=svc:/network/nis/xfr
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.2
+
+  - name: 2.3.3 Disable NIS Client Daemons (Scored)
+    service: >
+      name=svc:/network/nis/client
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.3
+
+  - name: 2.3.4 Disable NIS+ Daemons (Scored)
+    service: >
+      name=svc:/network/rpc/nisplus
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.4
+
+  - name: 2.3.5 Disable LDAP Cache Manager (check if LDAP is configured) (Scored)
+    stat: path=/var/ldap/ldap_client_file
+    register: ldap_client
+    tags:
+      - scored
+      - section2.3
+      - section2.3.5
+
+  - name: 2.3.5 Disable LDAP Cache Manager (Scored)
+    service: >
+      name=svc:/network/ldap/client
+      enabled=false
+    when: ldap_client.stat.exists == True
+    tags:
+      - scored
+      - section2.3
+      - section2.3.5
+
+  - name: 2.3.6 Disable Kerberos TGT Expiration Warning (Scored)
+    service: >
+      name=svc:/network/security/ktkt_warn
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.6
+
+  - name: 2.3.7 Disable Generic Security Services (GSS) Daemons (Scored)
+    service: >
+      name=svc:/network/rpc/gss
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.7
+
+  - name: 2.3.8 Disable Volume Manager [volfs] (Scored)
+    service: >
+      name=svc:/system/filesystem/volfs
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.8
+
+  - name: 2.3.8 Disable Volume Manager [smserver] (Scored)
+    service: >
+      name=svc:/network/rpc/smserver
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.8
+
+  - name: 2.3.9 Disable Samba Support (Scored)
+    service: >
+      name=svc:/network/samba
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.9
+
+  - name: 2.3.10 Disable automount Daemon (Scored)
+    service: >
+      name=svc:/system/filesystem/autofs
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.10
+
+  - name: 2.3.11 Disable Apache Services (Scored)
+    service: >
+      name=svc:/network/http:apache2
+      enabled=false
+    tags:
+      - scored
+      - section2.3
+      - section2.3.11
+
+  - name: 2.3.12 Disable Solaris Volume Manager Services [metainit] (Scored)
+    service: >
+      name=svc:/system/metainit
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.12
+
+  - name: 2.3.12 Disable Solaris Volume Manager Services [mdmonitor] (Scored)
+    service: >
+      name=svc:/system/mdmonitor
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.12
+
+  - name: 2.3.13 Disable Solaris Volume Manager GUI [mdcomm] (Scored)
+    service: >
+      name=svc:/network/rpc/mdcomm
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.13
+
+  - name: 2.3.13 Disable Solaris Volume Manager GUI [meta] (Scored)
+    service: >
+      name=svc:/network/rpc/meta
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.13
+
+  - name: 2.3.13 Disable Solaris Volume Manager GUI [metamed] (Scored)
+    service: >
+      name=svc:/network/rpc/metamed
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.13
+
+  - name: 2.3.13 Disable Solaris Volume Manager GUI [metamh] (Scored)
+    service: >
+      name=svc:/network/rpc/metamh
+      enabled=false
+    when: ansible_container != "zone"
+    tags:
+      - scored
+      - section2.3
+      - section2.3.13
+
+  - name: 2.3.14 Disable Local RPC Port Mapping Service (Scored)
+    service: >
+      name=svc:/network/rpc/bind
+      enabled=false
+    #debug: May use tcpwrapper
+    #debug: XXX TBD disable only when not needed
+    tags:
+      - scored
+      - section2.3
+      - section2.3.14
+
+  - name: 2.4 Configure TCP Wrappers
+    command: /usr/sbin/inetadm -p
+    register: inetadm
+    tags:
+      - scored
+      - section2.4
+
+  - name: 2.4 Configure TCP Wrappers
+    lineinfile: >
+      state=present
+      create=yes
+      dest=/etc/hosts.allow
+      regexp=^ALL
+      line=ALL:{{ tcp_allow | default("ALL") }}
+    # When TCP Wrappers is already enabled hosts.allow has most certainly been set up
+    when: inetadm.stdout not contains 'tcp_wrappers=TRUE'
+    tags:
+      - scored
+      - section2.4
+
+  - name: 2.4 Configure TCP Wrappers
+    lineinfile: >
+      state=present
+      create=yes
+      dest=/etc/hosts.deny
+      line=ALL: ALL
+    # When TCP Wrappers is already enabled hosts.deny has most certainly been set up
+    when: inetadm.stdout not contains 'tcp_wrappers=TRUE'
+    tags:
+      - scored
+      - section2.4
+
+  - name: 2.4 Configure TCP Wrappers
+    command: /usr/sbin/inetadm -M tcp_wrappers=TRUE
+    when: inetadm.stdout 
+    tags:
+      - scored
+      - section2.4

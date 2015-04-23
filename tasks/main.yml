@@ -41,3 +41,6 @@
 
   - include: section_09.yml
     tags: section9
+
+  - include: section_final.yml
+    tags: all
