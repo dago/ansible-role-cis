@@ -70,13 +70,18 @@
       - scored
       - section3.1
 
-  - name: 3.2 Enable Stack Protection (Scored)
+  - name: 3.2 Enable Stack Protection [noexec_user_stack] (Scored)
     lineinfile: >
       dest=/etc/system
       state=present
       line="set noexec_user_stack=1"
       backup=yes
     when: ansible_container != "zone"
+    tags:
+      - scored
+      - section3.2
+
+  - name: 3.2 Enable Stack Protection [noexec_user_stack_log] (Scored)
     lineinfile: >
       dest=/etc/system
       state=present

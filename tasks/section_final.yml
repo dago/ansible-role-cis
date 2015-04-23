@@ -15,8 +15,10 @@
 #   limitations under the License.
 #
 
-  - name: Reboot
-    debug: msg="Please reboot the system for the changes to take effect"
-    when: requires_reboot
+  - name: Reboot if required
+    #debug: msg="Please reboot the system for the changes to take effect"
+    command: /bin/true
+    failed_when: required_reboot is defined and requires_reboot
+    changed_when: required_reboot is defined and requires_reboot
     tags:
       - always

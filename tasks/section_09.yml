@@ -15,263 +15,206 @@
 #   limitations under the License.
 #
 
-  - name: 9.1.2 Verify Permissions on /etc/passwd (Scored)
-    file: >
-      path=/etc/passwd
-      mode=0644
+  - name: 9.1 Check for Remote Consoles (Scored)
+    command: /usr/sbin/consadm
+    register: consadm
+    when: ansible_container != "zone"
+    failed_when: consadm.stdout
+    changed_when: consadm.stdout
+    always_run: yes
+    ignore_errors: yes
     tags:
       - scored
       - section9.1
-      - section9.1.2
 
-  - name: 9.1.3 Verify Permissions on /etc/shadow (Scored)
-    file: >
-      path=/etc/shadow
-      mode=0000
-    tags:
-      - scored
-      - section9.1
-      - section9.1.3
-
-  - name: 9.1.5 Verify Permissions on /etc/group (Scored)
-    file: >
-      path=/etc/group
-      mode=0644
-    tags:
-      - scored
-      - section9.1
-      - section9.1.5
-
-  - name: 9.1.6 Verify User/Group Ownership on /etc/passwd (Scored)
+  - name: 9.2 Verify File System Permissions [passwd] (Scored)
     file: >
       path=/etc/passwd
       owner=root
-      group=root
+      group=sys
+      mode=0644
     tags:
       - scored
-      - section9.1
-      - section9.1.6
+      - section9.2
 
-  - name: 9.1.7 Verify User/Group Ownership on /etc/shadow (Scored)
+  - name: 9.2 Verify File System Permissions [shadow] (Scored)
     file: >
       path=/etc/shadow
       owner=root
-      group=root
-    tags:
-      - scored
-      - section9.1
-      - section9.1.7
-
-  - name: 9.1.9 Verify User/Group Ownership on /etc/group (Scored)
-    file: >
-      path=/etc/group
-      owner=root
-      group=root
-    tags:
-      - scored
-      - section9.1
-      - section9.1.9
-
-  - name: 9.1.10 Find World Writable Files (Not Scored)
-    shell: "df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002"
-    when: verify_find
-    tags:
-      - notscored
-      - section9.1
-      - section9.1.10
-
-  - name: 9.1.11 Find Un-owned Files and Directories (Scored)
-    shell: "df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser -ls"
-    when: verify_find
-    tags:
-      - scored
-      - section9.1
-      - section9.1.11
-
-  - name: 9.1.12 Find Un-grouped Files and Directories (Scored)
-    shell: "df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup -ls"
-    when: verify_find
-    tags:
-      - scored
-      - section9.1
-      - section9.1.12
-
-  - name: 9.1.13 Find SUID System Executables (Not Scored)
-    shell: '/bin/rpm -V `/bin/rpm -qf /usr/bin/sudo`'
-    register: suid
-    when: verify_rpm
-    tags:
-      - notscored
-      - section9.1
-      - section9.1.13
-
-  - name: 9.1.14 Find SGID System Executables (Not Scored)
-    shell: '/bin/rpm -V `/bin/rpm -qf /usr/bin/sudo`'
-    register: sgid
-    when: verify_rpm
-    tags:
-      - notscored
-      - section9.1
-      - section9.1.14
-
-  - name: 9.2.1 Ensure Password Fields are Not Empty (Scored)
-    shell: /bin/cat /etc/shadow | /bin/awk -F':' '($2 == "" ) { print $1 " does not have a password "}'
-    register: result9_2_1
-    changed_when: "result9_2_1.stdout"
-    always_run: yes
+      group=sys
+      mode=0400
     tags:
       - scored
       - section9.2
-      - section9.2.1
 
-  - name: 9.2.2 Verify No Legacy "+" Entries Exist in /etc/passwd File (Scored)
-    shell: /bin/grep '^+:' /etc/passwd
-    register: result9_2_2
-    failed_when: result9_2_2.rc == 0
-    changed_when: result9_2_2.rc == 0
+  - name: 9.3 Ensure Password Fields are Not Empty (Scored)
+    command: logins -p
+    register: result9_3
+    changed_when: "result9_3.stdout"
+    always_run: yes
+    tags:
+      - scored
+      - section9.3
+
+  - name: 9.4 Verify No Legacy "+" Entries Exist in passwd, shadow and group Files [passwd] (Scored)
+    shell: grep '^+:' /etc/passwd
+    register: result9_4_passwd
+    failed_when: result9_4_passwd.rc == 0
+    changed_when: result9_4_passwd.rc == 0
     always_run: yes
     ignore_errors: yes
     tags:
       - scored
-      - section9.2
-      - section9.2.2
+      - section9.4
 
-  - name: 9.2.3 Verify No Legacy "+" Entries Exist in /etc/shadow File (Scored)
-    shell: /bin/grep '^+:' /etc/shadow
-    register: result9_2_3
-    failed_when: result9_2_3.rc == 0
-    changed_when: result9_2_3.rc == 0
+  - name: 9.4 Verify No Legacy "+" Entries Exist in passwd, shadow and group Files (Scored)
+    shell: grep '^+:' /etc/shadow
+    register: result9_4_shadow
+    failed_when: result9_4_shadow.rc == 0
+    changed_when: result9_4_shadow.rc == 0
     always_run: yes
     ignore_errors: yes
     tags:
       - scored
-      - section9.2
-      - section9.2.3
+      - section9.4
 
-  - name: 9.2.4 Verify No Legacy "+" Entries Exist in /etc/group File (Scored)
-    shell: /bin/grep '^+:' /etc/group
-    register: result9_2_4
-    failed_when: result9_2_4.rc == 0
-    changed_when: result9_2_4.rc == 0
+  - name: 9.4 Verify No Legacy "+" Entries Exist in passwd, shadow and group Files (Scored)
+    shell: grep '^+:' /etc/group
+    register: result9_4_group
+    failed_when: result9_4_group.rc == 0
+    changed_when: result9_4_group.rc == 0
     always_run: yes
     ignore_errors: yes
     tags:
       - scored
-      - section9.2
-      - section9.2.4
+      - section9.4
 
-  - name: 9.2.5 Verify No UID 0 Accounts Exist Other Than root (Scored)
-    shell: /bin/awk -F':' '($3 == 0) { print $1 }' /etc/passwd | grep -qx 'root'
-    register: result9_2_5
-    failed_when: result9_2_5.rc != 0
-    changed_when: result9_2_5.rc != 0
+  - name: 9.5 Verify No UID 0 Accounts Exist Other Than root (Scored)
+    shell: logins -o | awk -F':' '($1 != "root" && $2 == 0) { print $1 }'
+    register: result9_5
+    failed_when: result9_5.stdout.strip() != ""
+    changed_when: result9_5.stdout.strip() != ""
     always_run: yes
     ignore_errors: yes
     tags:
       - scored
-      - section9.2
-      - section9.2.5
+      - section9.5
 
-  - name: 9.2.6 Ensure root PATH Integrity (Scored)
+  - name: 9.6 Ensure root PATH Integrity (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.6
+
+  - name: 9.7 Check Permissions on User Home Directories (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.7
+
+  - name: 9.8 Check User Dot File Permissions (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.8
+
+  - name: 9.9 Check Permissions on User .netrc Files (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.9
+
+  - name: 9.10 Check for Presence of User .rhosts Files (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.10
+
+  - name: 9.11 Check Groups in /etc/passwd (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.11
+
+  - name: 9.12 Check That Users Are Assigned Home Directories (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.12
+
+  - name: 9.13 Check That Users Are Assigned Home Directories (Scored)
+    debug: msg="*** To do later"
+    # XXX TBD
+    tags:
+      - scored
+      - section9.13
+
+  - name: 9.14 Check User Home Directory Ownership (Scored)
     debug: msg="*** To do later"
     tags:
       - scored
-      - section9.2
-      - section9.2.6
+      - section9.14
 
-  - name: 9.2.7 Check Permissions on User Home Directories (Scored)
-    debug: msg="*** To do later"
+  - name: 9.15 Check for Duplicate UIDs (Scored)
+    command: logins -d
+    register: logins_d
+    failed_when: logins_d.stdout
+    changed_when: logins_d.stdout
+    always_run: yes
+    ignore_errors: yes
     tags:
       - scored
-      - section9.2
-      - section9.2.7
+      - section9.15
 
-  - name: 9.2.8 Check User Dot File Permissions (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.8
-
-  - name: 9.2.9 Check Permissions on User .netrc Files (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.9
-
-  - name: 9.2.10 Check for Presence of User .rhosts Files (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.10
-
-  - name: 9.2.11 Check Groups in /etc/passwd (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.11
-
-  - name: 9.2.12 Check That Users Are Assigned Valid Home Directories (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.12
-
-  - name: 9.2.13 Check User Home Directory Ownership (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.13
-
-  - name: 9.2.14 Check for Duplicate UIDs (Scored)
-    debug: msg="*** To do later"
-    tags:
-      - scored
-      - section9.2
-      - section9.2.14
-
-  - name: 9.2.15 Check for Duplicate GIDs (Scored)
+  - name: 9.16 Check for Duplicate GIDs (Scored)
     shell: for dupeID in  $(cut -f3 -d":" /etc/group | sort | uniq -c | sort -n | awk ' $1 > 1 {print $2}'); do awk -F':' -v dupeid=$dupeID '$3 == dupeid {print $1}' /etc/group   ; done
-    register: result9_2_15
-    changed_when: "result9_2_15.stdout"
-    always_run: yes
-    tags:
-      - scored
-      - check-only
-      - section9.2
-      - section9.2.15
-
-  - name: 9.2.16 Check for Duplicate User Names (Scored)
-    shell: cut -f1 -d':' /etc/passwd | sort | uniq -c | sort -n | awk ' $1 > 1 {print $2}'
     register: result9_2_16
     changed_when: "result9_2_16.stdout"
     always_run: yes
     tags:
       - scored
       - check-only
-      - section9.2
-      - section9.2.16
+      - section9.16
 
-  - name: 9.2.17 Check for Duplicate Group Names (Scored)
-    shell: cut -f1 -d':' /etc/group | sort | uniq -c | sort -n | awk ' $1 > 1 {print $2}'
-    register: result9_2_17
-    changed_when: "result9_2_17.stdout"
+  - name: 9.17 Check That Reserved UIDs Are Assigned to System Accounts (Scored)
+    debug: msg="*** To do later"
+    tags:
+      - scored
+      - section9.17
+
+  - name: 9.18 Check for Duplicate User Names (Scored)
+    command: logins -d
+    register: logins_d
+    changed_when: logins_d.stdout
+    failed_when: logins_d.stdout
     always_run: yes
     tags:
       - scored
       - check-only
-      - section9.2
-      - section9.2.17
+      - section9.18
 
-  - name: 9.2.18 Check for Presence of User .netrc Files (Scored)
-    shell:  for h in $(/bin/awk -F':' '$7 !~ /\/sbin\/nologin/ && $7 !~ /\/bin\/false/ { print $6 }' /etc/passwd); do if [[ -f $h/.netrc && -s $h/.netrc ]]; then echo $h; fi ; done
-    register: result9_2_18
-    changed_when: "result9_2_18.stdout"
+  - name: 9.19 Check for Duplicate Group Names (Scored)
+    shell: getent group | cut -f1 -d":" | sort -n | uniq -c | while read x; do [ -z "${x}" ] && break; set - $x; if [ $1 -gt 1 ]; then gids=`getent group | nawk -F":" '($1 == n) { print $3 }' n=$2 | xargs`; echo "Duplicate Group Name ($2)":" ${gids}"; fi; done
+    register: result9_19
+    changed_when: "result9_19.stdout"
+    always_run: yes
+    tags:
+      - scored
+      - check-only
+      - section9.19
+
+  - name: 9.20 Check for Presence of User .netrc Files (Scored)
+    shell: for dir in `logins -ox | awk -F':' '($8 == "PS") { print $6 }'`; do ls -l ${dir}/.netrc 2>/dev/null; done
+    register: result9_20
+    changed_when: "result9_20.stdout"
+    failed_when: result9_20.stdout
     always_run: yes
     tags:
       - scored
@@ -279,17 +222,54 @@
       - section9.2
       - section9.2.18
 
-  - name: 9.2.19 Check for Presence of User .forward Files (Scored)
-    shell:  for h in $(/bin/awk -F':' '$7 !~ /\/sbin\/nologin/ && $7 !~ /\/bin\/false/ { print $6 }' /etc/passwd); do if [[ -f $h/.forward && -s $h/.forward ]]; then echo $h; fi ; done
-    register: result9_2_19
-    changed_when: "result9_2_19.stdout"
+  - name: 9.21 Check for Presence of User .forward Files (Scored)
+    shell: for dir in `logins -ox | awk -F':' '($8 == "PS") { print $6 }'`; do ls -l ${dir}/.forward 2>/dev/null; done
+    register: result9_21
+    changed_when: "result9_21.stdout"
+    failed_when: result9_21.stdout
     always_run: yes
     tags:
       - scored
       - check-only
-      - section9.2
-      - section9.2.19
+      - section9.21
 
-#  - debug: var=result9_2_19.stdout
-#    tags:
-#      - section9.2.19
+  - name: 9.22 Find World Writable Files (Not Scored)
+    shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o -type d \( -perm -0002 -a ! -perm -1000 \) -print
+    when: verify_find
+    tags:
+      - notscored
+      - section9.22
+
+  - name: 9.23 Find SUID/SGID System Executables (Not Scored)
+    shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o -type f -perm -4000 -o -perm -2000 -print
+    register: result9_23
+    when: verify_find
+    changed_when: "result9_23.stdout"
+    failed_when: result9_23.stdout
+    always_run: yes
+    tags:
+      - notscored
+      - section9.23
+
+  - name: 9.24 Find Un-owned Files and Directories (Scored)
+    shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o \( -nouser -o -nogroup \) -print
+    register: result9_24
+    when: verify_find
+    changed_when: "result9_24.stdout"
+    failed_when: result9_24.stdout
+    always_run: yes
+    tags:
+      - scored
+      - section9.24
+
+  - name: 9.25 Find Files and Directories with Extended Attributes (Scored)
+    shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o -xattr -ls
+    register: result9_25
+    when: verify_find
+    changed_when: "result9_25.stdout"
+    failed_when: result9_25.stdout
+    always_run: yes
+    tags:
+      - scored
+      - section9.25
+
