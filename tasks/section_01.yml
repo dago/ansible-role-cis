@@ -15,29 +15,48 @@
 #   limitations under the License.
 #
 
-  - name: 1.1 Use the Latest OS Release (Scored)
-    command: >
-      cat /etc/release
+  - name: 1.1 Use the Latest OS Release (Not Scored)
+    command: cat /etc/release
+    changed_when: false
     tags:
       - manual
-      - scored
+      - notscored
       - section1.1
 
   - name: 1.2 Apply Latest OS Patches (Not Scored)
     debug: msg="*** Manually apply latest Critical Patch Update cluster."
     tags:
+      - manual
       - notscored
       - section1.2
 
   - name: 1.3 Install Solaris Encryption Kit (Not Scored)
-    # debug: msg="*** The encryption kit is downloadable from http://www.oracle.com/technetwork/server-storage/solaris/downloads/encryptionkit-485737.html"
-    svr4pkg: name=SUNWcry src=none state=present
+    copy: >
+      src=section_01/sol-10-encrypt-GA-{{ ansible_architecture }}.pkg
+      dest=/var/tmp/sol-10-encrypt-GA.pkg
+    when: ansible_container != "zone"
     tags:
       - notscored
       - section1.3
 
   - name: 1.3 Install Solaris Encryption Kit (Not Scored)
-    svr4pkg: name=SUNWcryr src=none state=present
+    svr4pkg: >
+      name={{ item }}
+      src=/var/tmp/sol-10-encrypt-GA.pkg
+      state=present
+    with_items:
+      - SUNWcry
+      - SUNWcryr
+    when: ansible_container != "zone"
+    tags:
+      - notscored
+      - section1.3
+
+  - name: 1.3 Install Solaris Encryption Kit (Not Scored)
+    file: >
+      path=/var/tmp/sol-10-encrypt-GA.pkg
+      state=absent
+    when: ansible_container != "zone"
     tags:
       - notscored
       - section1.3

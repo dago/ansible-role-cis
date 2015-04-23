@@ -102,37 +102,15 @@
       - section2.3
       - section2.3.1
 
-  - name: 2.3.2 Disable NIS Server Daemons [server] (Scored)
+  - name: 2.3.2 Disable NIS Server Daemons (Scored)
     service: >
       name=svc:/network/nis/server
       enabled=false
-    tags:
-      - scored
-      - section2.3
-      - section2.3.2
-
-  - name: 2.3.2 Disable NIS Server Daemons [passwd] (Scored)
-    service: >
-      name=svc:/network/nis/passwd
-      enabled=false
-    tags:
-      - scored
-      - section2.3
-      - section2.3.2
-
-  - name: 2.3.2 Disable NIS Server Daemons [update] (Scored)
-    service: >
-      name=svc:/network/nis/update
-      enabled=false
-    tags:
-      - scored
-      - section2.3
-      - section2.3.2
-
-  - name: 2.3.2 Disable NIS Server Daemons [xfr] (Scored)
-    service: >
-      name=svc:/network/nis/xfr
-      enabled=false
+    with_items:
+      - server
+      - passwd
+      - update
+      - xfr
     tags:
       - scored
       - section2.3
@@ -237,20 +215,38 @@
       - section2.3
       - section2.3.11
 
-  - name: 2.3.12 Disable Solaris Volume Manager Services [metainit] (Scored)
-    service: >
-      name=svc:/system/metainit
-      enabled=false
-    when: ansible_container != "zone"
+  - name: 2.3.11 Disable Apache Services (Scored)
+    stat: path=/etc/apache/httpd.conf
+    register: result2_3_11
     tags:
       - scored
       - section2.3
-      - section2.3.12
+      - section2.3.11
 
-  - name: 2.3.12 Disable Solaris Volume Manager Services [mdmonitor] (Scored)
+  - name: 2.3.11 Disable Apache Services (Scored)
+    command: /etc/init.d/apache stop
+    when: result2_3_11.stat.exists == True
+    tags:
+      - scored
+      - section2.3
+      - section2.3.11
+
+  - name: 2.3.11 Disable Apache Services (Scored)
+    command: >
+      mv /etc/apache/httpd.conf /etc/apache/httpd.conf.CIS
+      removes=/etc/apache/httpd.conf
+    tags:
+      - scored
+      - section2.3
+      - section2.3.11
+
+  - name: 2.3.12 Disable Solaris Volume Manager Services (Scored)
     service: >
-      name=svc:/system/mdmonitor
+      name=svc:/system/{{ item }}
       enabled=false
+    with_items:
+      - metainit
+      - mdmonitor
     when: ansible_container != "zone"
     tags:
       - scored
@@ -259,38 +255,13 @@
 
   - name: 2.3.13 Disable Solaris Volume Manager GUI [mdcomm] (Scored)
     service: >
-      name=svc:/network/rpc/mdcomm
+      name=svc:/network/rpc/{{ item }}
       enabled=false
-    when: ansible_container != "zone"
-    tags:
-      - scored
-      - section2.3
-      - section2.3.13
-
-  - name: 2.3.13 Disable Solaris Volume Manager GUI [meta] (Scored)
-    service: >
-      name=svc:/network/rpc/meta
-      enabled=false
-    when: ansible_container != "zone"
-    tags:
-      - scored
-      - section2.3
-      - section2.3.13
-
-  - name: 2.3.13 Disable Solaris Volume Manager GUI [metamed] (Scored)
-    service: >
-      name=svc:/network/rpc/metamed
-      enabled=false
-    when: ansible_container != "zone"
-    tags:
-      - scored
-      - section2.3
-      - section2.3.13
-
-  - name: 2.3.13 Disable Solaris Volume Manager GUI [metamh] (Scored)
-    service: >
-      name=svc:/network/rpc/metamh
-      enabled=false
+    with_items:
+      - mdcomm
+      - meta
+      - metamd
+      - metamh
     when: ansible_container != "zone"
     tags:
       - scored
@@ -301,8 +272,8 @@
     service: >
       name=svc:/network/rpc/bind
       enabled=false
+    when: not defined needs_rpcbind or not needs_rpcbind
     #debug: May use tcpwrapper
-    #debug: XXX TBD disable only when not needed
     tags:
       - scored
       - section2.3
@@ -342,7 +313,7 @@
 
   - name: 2.4 Configure TCP Wrappers
     command: /usr/sbin/inetadm -M tcp_wrappers=TRUE
-    when: inetadm.stdout 
+    when: inetadm.stdout not contains 'tcp_wrappers=TRUE'
     tags:
       - scored
       - section2.4
