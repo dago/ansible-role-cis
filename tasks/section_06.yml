@@ -30,14 +30,6 @@
       dest=/etc/default/keyserv
       regexp="^ENABLE_NOBODY_KEYS="
       line="ENABLE_NOBODY_KEYS=NO"
-    register: keyserv
-    tags:
-      - scored
-      - section6.2
-
-  - name: 6.2 Disable "nobody" Access for RPC Encryption Key Storage Service (Scored)
-    shell: pkgchk -f -n -p /etc/default/keyserv
-    when: keyserv.changed
     tags:
       - scored
       - section6.2
@@ -196,19 +188,21 @@
       - scored
       - section6.10
 
-  - name: 6.11 Set Retry Limit for Account Lockout (Scored)
+  - name: 6.11 Set Retry Limit for Account Lockout [RETRIES] (Scored)
     lineinfile: >
       dest=/etc/default/login
       regexp="^\s*RETRIES\s*="
+      insertafter="^#RETRIES="
       line="RETRIES=3"
     tags:
       - scored
       - section6.11
 
-  - name: 6.11 Set Retry Limit for Account Lockout (Scored)
+  - name: 6.11 Set Retry Limit for Account Lockout [LOCK_AFTER_RETRIES] (Scored)
     lineinfile: >
       dest=/etc/security/policy.conf
       regexp="^\s*LOCK_AFTER_RETRIES\s*="
+      insertafter="^#LOCK_AFTER_RETRIES="
       line="LOCK_AFTER_RETRIES=YES"
     tags:
       - scored

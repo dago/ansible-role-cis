@@ -16,66 +16,131 @@
 #
 
   - name: 4.1 Enable inetd Connection Logging (Scored)
-    shell: inetadm -M tcp_trace=true
+    command: svcprop -p defaults/tcp_trace svc:/network/inetd:default
+    register: result4_1
+    changed_when: false
+    always_run: yes
+    ignore_errors: yes
+    tags:
+      - scored
+      - section4.1
+
+  - name: 4.1 Enable inetd Connection Logging (Scored)
+    command: inetadm -M tcp_trace=true
+    when: result4_1.stdout == "false"
     notify: Refresh inetd
-    # XXX: audit svcprop -p defaults/tcp_trace svc:/network/inetd
     tags:
       - scored
       - section4.1
 
   - name: 4.2 Enable FTP daemon Logging (Scored)
-    shell: inetadm -m svc:/network/ftp exec="/usr/sbin/in.ftpd -a -l -d"
-    # XXX: audit svcprop -p inetd_start/exec svc:/network/ftp "/usr/sbin/in.ftpd -a -l -d"
+    command: svcprop -p inetd_start/exec svc:/network/ftp:default
+    register: result4_2
+    changed_when: false
+    always_run: yes
+    ignore_errors: yes
+    tags:
+      - scored
+      - section4.2
+
+  - name: 4.2 Enable FTP daemon Logging (Scored)
+    command: inetadm -m svc:/network/ftp exec="/usr/sbin/in.ftpd -a -l -d"
+    when: result4_2.stdout != '/usr/sbin/in.ftpd\\ -a\\ -l\\ -d'
     tags:
       - scored
       - section4.2
 
   - name: 4.3 Enable Debug Level Daemon Logging (Scored)
-    file: path=/var/log/connlog owner=root group=root mode=600 state=touch
+    stat: path=/var/log/connlog
+    register: connlog
+    always_run: yes
     tags:
       - scored
       - section4.3
 
   - name: 4.3 Enable Debug Level Daemon Logging (Scored)
-    shell: logadm -w connlog -C 13 -a 'pkill -HUP syslogd' /var/log/connlog
+    file: >
+      path=/var/log/connlog
+      owner=root
+      group=root
+      mode=600
+      state="{{ 'file' if connlog.stat.exists else 'touch' }}"
     tags:
       - scored
       - section4.3
 
   - name: 4.3 Enable Debug Level Daemon Logging (Scored)
-    lineinfile: dest=/etc/syslog.conf line="daemon.debug\t\t\t/var/log/connlog" 
+    command: logadm -w connlog -C 13 -a 'pkill -HUP syslogd' /var/log/connlog
+    tags:
+      - scored
+      - section4.3
+
+  - name: 4.3 Enable Debug Level Daemon Logging (Scored)
+    lineinfile: >
+      dest=/etc/syslog.conf
+      line="daemon.debug\t\t\t\t\t/var/log/connlog" 
+      regexp='\s+/var/log/connlog\s*$'
     notify: Refresh syslogd
     tags:
       - scored
       - section4.3
 
   - name: 4.4 Capture syslog AUTH Messages (Scored)
-    file: path=/var/log/authlog owner=root group=sys mode=600 state=touch
+    stat: path=/var/log/authlog
+    register: authlog
+    always_run: yes
     tags:
       - scored
       - section4.4
 
   - name: 4.4 Capture syslog AUTH Messages (Scored)
-    shell: logadm -w authlog -C 13 -a 'pkill -HUP syslogd' /var/log/authlog
+    file: >
+      path=/var/log/authlog
+      owner=root
+      group=sys
+      mode=600
+      state="{{ 'file' if authlog.stat.exists else 'touch' }}"
     tags:
       - scored
       - section4.4
 
   - name: 4.4 Capture syslog AUTH Messages (Scored)
-    lineinfile: dest=/etc/syslog.conf line="auth.info\t\t\t/var/log/authlog" 
+    command: logadm -w authlog -C 13 -a 'pkill -HUP syslogd' /var/log/authlog
+    tags:
+      - scored
+      - section4.4
+
+  - name: 4.4 Capture syslog AUTH Messages (Scored)
+    lineinfile: >
+      dest=/etc/syslog.conf
+      line="auth.info\t\t\t\t\t/var/log/authlog" 
+      regexp='\s+/var/log/authlog\s*$'
     notify: Refresh syslogd
     tags:
       - scored
       - section4.4
 
   - name: 4.5 Enable Login Records (Scored)
-    file: path=/var/adm/loginlog owner=root group=sys mode=600 state=touch
+    stat: path=/var/adm/loginlog
+    register: loginlog
+    always_run: yes
     tags:
       - scored
       - section4.5
 
   - name: 4.5 Enable Login Records (Scored)
-    shell: logadm -w authlog -C 13 /var/adm/loginlog
+    file: >
+      path=/var/adm/loginlog
+      owner=root
+      group=sys
+      mode=600
+      state="{{ 'file' if loginlog.stat.exists else 'touch' }}"
+    tags:
+      - scored
+      - section4.5
+
+  - name: 4.5 Enable Login Records (Scored)
+    command: logadm -w loginlog -C 13 /var/adm/loginlog
     tags:
       - scored
       - section4.5
@@ -86,20 +151,25 @@
       regexp="^SYSLOG_FAILED_LOGINS="
       insertafter="^#SYSLOG_FAILED_LOGINS="
       line="SYSLOG_FAILED_LOGINS=0"
-    register: login
-    tags:
-      - scored
-      - section4.6
-
-  - name: 4.6 Capture All Failed Login Attempts (Scored)
-    shell: pkgchk -f -n -p /etc/default/login
-    when: login.changed
     tags:
       - scored
       - section4.6
 
   - name: 4.7 Enable cron Logging (Scored)
-    file: path=/var/cron/log owner=root group=root mode=go-rwx
+    stat: path=/var/cron/log
+    register: cronlog
+    always_run: yes
+    tags:
+      - scored
+      - section4.7
+
+  - name: 4.7 Enable cron Logging (Scored)
+    file: >
+      path=/var/cron/log
+      owner=root
+      group=root
+      mode=go-rwx
+      state="{{ 'file' if cronlog.stat.exists else 'touch' }}"
     tags:
       - scored
       - section4.7
@@ -110,14 +180,6 @@
       regexp="^CRONLOG="
       insertafter="^#CRONLOG="
       line="CRONLOG=YES"
-    register: cron
-    tags:
-      - scored
-      - section4.7
-
-  - name: 4.7 Enable cron Logging (Scored)
-    shell: pkgchk -f -n -p /etc/default/cron
-    when: cron.changed
     tags:
       - scored
       - section4.7
@@ -131,13 +193,24 @@
       - section4.8
 
   - name: 4.8 Enable System Accounting (Scored)
-    cron: name="System Activity Reporter (Frequent)" user=sys minute="0,20,40" job="/usr/lib/sa/sa1" state=present
+    cron: >
+     name="System Activity Reporter (Frequent)"
+     user=sys
+     minute="0,20,40"
+     job="/usr/lib/sa/sa1"
+     state=present
     tags:
       - scored
       - section4.8
 
   - name: 4.8 Enable System Accounting (Scored)
-    cron: name="System Activity Reporter (Daily)" user=sys minute="45" hour="23" job="/usr/lib/sa/sa2 -s 0:00 -e 23:59 -i 1200 -A" state=present
+    cron: >
+      name="System Activity Reporter (Daily)"
+      user=sys
+      minute="45"
+      hour="23"
+      job="/usr/lib/sa/sa2 -s 0:00 -e 23:59 -i 1200 -A"
+      state=present
     tags:
       - scored
       - section4.8
@@ -150,4 +223,4 @@
       - section4.8
 
   - name: 4.9 Kernel Level Auditing (Scored)
-    debug: "XXX: TBD"
+    debug: msg="*** To do later"

@@ -18,6 +18,8 @@
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: /usr/bin/coreadm
     register: coreadm
+    changed_when: false
+    always_run: true
     tags:
       - scored
       - section3.1
@@ -35,37 +37,43 @@
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -g /var/cores/core_%n_%f_%u_%g_%t_%p
-    when: "'global core file pattern: /var/cores/core_%n_%f_%u_%g_%t_%p' not in coreadm.stdout_lines"
+    #when: "'     global core file pattern: /var/cores/core_%n_%f_%u_%g_%t_%p' not in coreadm.stdout_lines"
+    when: "'     global core file pattern: /var/cores/core_%n_%f_%u_%g_%t_%p' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -e log
+    when: "'     global core dump logging: enabled' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -e global
+    when: "'            global core dumps: enabled' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -e global-setid
+    when: "'      global setid core dumps: enabled' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -d process
+    when: "'       per-process core dumps: disabled' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
 
   - name: 3.1 Restrict Core Dumps to Protected Directory (Scored)
     command: coreadm -d proc-setid
+    when: "' per-process setid core dumps: disabled' not in coreadm.stdout_lines"
     tags:
       - scored
       - section3.1
@@ -98,6 +106,22 @@
       state=present
       regexp="^TCP_STRONG_ISS="
       line="TCP_STRONG_ISS=2"
+    tags:
+      - scored
+      - section3.3
+
+  - name: 3.3 Enable Strong TCP Sequence Number Generation (Scored)
+    command: ndd -get /dev/tcp tcp_strong_iss
+    register: tcp_strong_iss
+    changed_when: false
+    always_run: true
+    tags:
+      - scored
+      - section3.3
+
+  - name: 3.3 Enable Strong TCP Sequence Number Generation (Scored)
+    command: ndd -set /dev/tcp tcp_strong_iss 2
+    when: tcp_strong_iss.stdout != "2" and (ansible_container != "zone" or exclusive_ip_stack)
     tags:
       - scored
       - section3.3
