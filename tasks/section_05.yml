@@ -26,13 +26,6 @@
       - section5.1
 
   - name: 5.1 Set daemon umask (Scorable)
-    shell: pkgchk -f -n -p /etc/default/init
-    when: init.changed
-    tags:
-      - scored
-      - section5.1
-
-  - name: 5.1 Set daemon umask (Scorable)
     set_fact: requires_reboot=yes
     when: init.changed
     tags:
@@ -40,7 +33,12 @@
       - section5.1
 
   - name: 5.2 Restrict Set-UID on User Mounted Devices (Scored)
-    debug: "XXX: TBD and already default since Solaris 8"
+    lineinfile: >
+      dest=/etc/rmmount.conf
+      backup=yes
+      regexp='mount\s+'
+      line='mount * hsfs udfs ufs -o nosuid'
+    when: ansible_container != "zone"
     tags:
       - scored
       - section5.2
@@ -48,13 +46,17 @@
   - name: 5.3 Set Sticky Bit on World Writable Directories
     shell: find / \( -fstype nfs -o -fstype cachefs -o -fstype autofs -o -fstype ctfs -o -fstype mntfs -o -fstype objfs -o -fstype proc \) -prune -o -type d \( -perm -0002 -a ! -perm -1000 \) -print
     register: world_writable
+    when: verify_find
+    always_run: true
+    changed_when: false
     tags:
       - notscored
       - section5.3
 
   - name: 5.3 Set Sticky Bit on World Writable Directories
-    file: dest={{ item }} mode=u+t
+    file: dest={{ item }} mode=a+t
     with_items: world_writable.stdout_lines
+    when: verify_find
     tags:
       - notscored
       - section5.3
